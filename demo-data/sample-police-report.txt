@@ -1,0 +1,24 @@
+INTERCEPTED INTELLIGENCE REPORT — 22 AUGUST 2026
+
+Source: Confidential Informant (CI-4471)
+Classification: Probably True (B)
+
+SUMMARY:
+
+On 20/08/2026, suspect Rajesh Kumar (P-1001) was observed meeting with Vikram Singh (P-1003) at Sector 12 Market around 10:30 hours. Kumar was seen making multiple phone calls to +919876543210 during the meeting. Duration of calls ranged from 3 to 8 minutes.
+
+FOLLOW-UP:
+
+On 21/08/2026, Arjun Mehta (P-1005) received a cash transfer of ₹8,50,000 from Vikram Singh at Warehouse North. The transaction was flagged by the Financial Intelligence Unit as exceeding the standard threshold. Mehta subsequently made calls to P-1001 at Transit Hub 3.
+
+VEHICLE MOVEMENT:
+
+Vehicle DL-12-AB-3456 (owned by Dinesh Chaudhary) was spotted at IGI Airport Cargo Terminal on 22/08/2026 at approximately 07:00 hours. The vehicle was registered to person P-1005. Airport security footage shows the driver meeting with an unidentified individual near the cargo loading bay.
+
+FINANCIAL TRAIL:
+
+P-1001 transferred ₹6,20,000 to P-1010 via HDFC Bank on 23/08/2026. The amount was split into three smaller transactions of ₹2,00,000, ₹2,20,000, and ₹2,00,000 — consistent with structuring patterns designed to avoid reporting thresholds (Sec 302 of PMLA).
+
+RECOMMENDATION:
+
+Cross-reference the phone records of P-1001 and P-1003 for the period 15-25 August 2026. Flag all transactions exceeding ₹50,000 involving P-1001, P-1005, or Northern Logistics Pvt Ltd. Recommend surveillance on vehicle DL-12-AB-3456 at Dock Area and Cargo Terminal locations.

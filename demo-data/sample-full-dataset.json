@@ -1,0 +1,56 @@
+{
+  "persons": [
+    {"id": "P-2001", "name": "Ravi Shankar", "age": 48, "gender": "male", "occupation": "Businessman", "address": "Delhi, Karol Bagh, Block A"},
+    {"id": "P-2002", "name": "Sunita Devi", "age": 35, "gender": "female", "occupation": "Teacher", "address": "Delhi, Lajpat Nagar, House 14"},
+    {"id": "P-2003", "name": "Mohit Verma", "age": 29, "gender": "male", "occupation": "Driver", "address": "Gurgaon, Sector 22, Flat 5B"},
+    {"id": "P-2004", "name": "Pooja Nair", "age": 32, "gender": "female", "occupation": "Accountant", "address": "Noida, Sector 62, Tower 3"},
+    {"id": "P-2005", "name": "Dinesh Chaudhary", "age": 52, "gender": "male", "occupation": "Contractor", "address": "Faridabad, Nehar Par, GH-12"}
+  ],
+  "entities": [
+    {"id": "P-2001", "type": "person", "label": "Ravi Shankar", "name": "Ravi Shankar", "attributes": {"age": 48, "gender": "male", "occupation": "Businessman"}},
+    {"id": "P-2002", "type": "person", "label": "Sunita Devi", "name": "Sunita Devi", "attributes": {"age": 35, "gender": "female", "occupation": "Teacher"}},
+    {"id": "P-2003", "type": "person", "label": "Mohit Verma", "name": "Mohit Verma", "attributes": {"age": 29, "gender": "male", "occupation": "Driver"}},
+    {"id": "P-2004", "type": "person", "label": "Pooja Nair", "name": "Pooja Nair", "attributes": {"age": 32, "gender": "female", "occupation": "Accountant"}},
+    {"id": "P-2005", "type": "person", "label": "Dinesh Chaudhary", "name": "Dinesh Chaudhary", "attributes": {"age": 52, "gender": "male", "occupation": "Contractor"}},
+    {"id": "PHONE-2001", "type": "phone", "label": "PHONE-2001", "attributes": {"owner": "P-2001", "carrier": "Jio"}},
+    {"id": "PHONE-2002", "type": "phone", "label": "PHONE-2002", "attributes": {"owner": "P-2003", "carrier": "Airtel"}},
+    {"id": "LOC-2001", "type": "location", "label": "Connaught Place", "name": "Connaught Place", "attributes": {"type": "commercial"}},
+    {"id": "LOC-2002", "type": "location", "label": "IGI Airport Cargo", "name": "IGI Airport Cargo", "attributes": {"type": "transit"}},
+    {"id": "BANK-2001", "type": "bank", "label": "BANK-2001", "attributes": {"owner": "P-2001", "bank": "HDFC", "balance": 2500000}},
+    {"id": "VEH-2001", "type": "vehicle", "label": "VEH-2001", "attributes": {"type": "SUV", "owner": "P-2005", "registration": "DL-10-AB-5678"}},
+    {"id": "ORG-2001", "type": "organization", "label": "Northern Logistics Pvt Ltd", "name": "Northern Logistics Pvt Ltd", "attributes": {"type": "logistics"}},
+    {"id": "FIR-2026-201", "type": "fir", "label": "FIR-2026-201", "attributes": {"title": "Suspicious Cargo Movement", "date": "2026-08-15", "section": "Sec 302", "status": "open"}}
+  ],
+  "relationships": [
+    {"id": "REL-2001", "source": "P-2001", "target": "P-2003", "type": "called", "strength": "high", "weight": 5, "attributes": {"total_calls": 45}},
+    {"id": "REL-2002", "source": "P-2001", "target": "P-2005", "type": "transacted", "strength": "high", "weight": 8, "attributes": {"total_amount": 1500000}},
+    {"id": "REL-2003", "source": "P-2003", "target": "P-2004", "type": "called", "strength": "medium", "weight": 3, "attributes": {"total_calls": 12}},
+    {"id": "REL-2004", "source": "P-2005", "target": "P-2004", "type": "associated", "strength": "medium", "weight": 2, "attributes": {}},
+    {"id": "REL-2005", "source": "P-2002", "target": "P-2004", "type": "called", "strength": "low", "weight": 1, "attributes": {"total_calls": 3}},
+    {"id": "REL-2006", "source": "P-2001", "target": "LOC-2001", "type": "located_at", "strength": "high", "weight": 6, "attributes": {"visits": 18}},
+    {"id": "REL-2007", "source": "P-2005", "target": "LOC-2002", "type": "located_at", "strength": "high", "weight": 4, "attributes": {"visits": 8}},
+    {"id": "REL-2008", "source": "P-2001", "target": "PHONE-2001", "type": "connected_to", "strength": "high", "weight": 1, "attributes": {"carrier": "Jio"}},
+    {"id": "REL-2009", "source": "P-2005", "target": "VEH-2001", "type": "shared_vehicle", "strength": "medium", "weight": 1, "attributes": {"registration": "DL-10-AB-5678"}},
+    {"id": "REL-2010", "source": "P-2001", "target": "ORG-2001", "type": "associated", "strength": "high", "weight": 3, "attributes": {}},
+    {"id": "REL-2011", "source": "P-2005", "target": "ORG-2001", "type": "associated", "strength": "high", "weight": 4, "attributes": {}},
+    {"id": "REL-2012", "source": "P-2003", "target": "FIR-2026-201", "type": "mentioned_in", "strength": "high", "weight": 1, "attributes": {"title": "Suspicious Cargo Movement"}},
+    {"id": "REL-2013", "source": "P-2005", "target": "FIR-2026-201", "type": "mentioned_in", "strength": "high", "weight": 1, "attributes": {"title": "Suspicious Cargo Movement"}},
+    {"id": "REL-2014", "source": "P-2001", "target": "P-2004", "type": "transacted", "strength": "high", "weight": 6, "attributes": {"total_amount": 850000}}
+  ],
+  "cdrs": [
+    {"id": "CDR-2001", "caller": "P-2001", "receiver": "P-2003", "timestamp": "2026-08-20T10:30:00.000Z", "duration": 345, "location": "LOC-2001", "callType": "outgoing"},
+    {"id": "CDR-2002", "caller": "P-2003", "receiver": "P-2001", "timestamp": "2026-08-20T11:15:00.000Z", "duration": 120, "location": "LOC-2001", "callType": "incoming"},
+    {"id": "CDR-2003", "caller": "P-2005", "receiver": "P-2001", "timestamp": "2026-08-20T14:00:00.000Z", "duration": 567, "location": "LOC-2002", "callType": "outgoing"}
+  ],
+  "transactions": [
+    {"id": "TXN-2001", "sender": "P-2001", "receiver": "P-2005", "amount": 850000, "timestamp": "2026-08-20T16:00:00.000Z", "location": "LOC-2001", "transactionType": "transfer"},
+    {"id": "TXN-2002", "sender": "P-2005", "receiver": "P-2001", "amount": 250000, "timestamp": "2026-08-21T10:00:00.000Z", "location": "LOC-2002", "transactionType": "cash"},
+    {"id": "TXN-2003", "sender": "P-2001", "receiver": "P-2004", "amount": 480000, "timestamp": "2026-08-22T09:00:00.000Z", "location": "LOC-2001", "transactionType": "transfer"}
+  ],
+  "locationEvents": [],
+  "clusters": [],
+  "anomalies": [],
+  "timeline": [],
+  "analysisResult": {"attentionScores": null, "topInfluencers": [], "modularityScore": 0},
+  "metadata": {"createdAt": "2026-08-26T00:00:00.000Z", "lastAnalyzed": null, "source": "import"}
+}
