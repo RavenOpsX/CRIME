@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Dataset, AISettings } from '@/types';
 import { generateDataset } from '@/data/generateDataset';
+import { analyze } from '@/analytics/detection';
 
 const DATASET_KEY = 'sih-criminal-network-dataset';
 const SETTINGS_KEY = 'sih-ai-settings';
@@ -85,19 +86,54 @@ export function useDataset() {
   }, [persistSettings]);
 
   const mergeCSVData = useCallback((newData: Partial<Dataset>) => {
-    if (!dataset) {
-      // If no dataset, create a minimal one and merge
-      const ds = generateDataset();
-      Object.assign(ds, newData);
-      ds.metadata.source = 'csv';
-      ds.metadata.lastAnalyzed = new Date().toISOString();
-      setDataset(ds);
-      persistDataset(ds);
-    } else {
-      const merged = { ...dataset, ...newData, metadata: { ...dataset.metadata, source: 'csv' as const, lastAnalyzed: new Date().toISOString() } };
+    setAnalyzing(true);
+    setTimeout(() => {
+      let merged: Dataset;
+      if (!dataset) {
+        const ds = generateDataset();
+        Object.assign(ds, newData);
+        ds.metadata.source = 'csv';
+        merged = ds;
+      } else {
+        merged = {
+          ...dataset,
+          ...newData,
+          metadata: { ...dataset.metadata, source: 'csv' as const, lastAnalyzed: null },
+        };
+      }
+
+      // Re-run the real detection engine on merged data
+      try {
+        const result = analyze(merged);
+        merged.clusters = result.clusters;
+        merged.anomalies = result.anomalies;
+        merged.analysisResult = {
+          attentionScores: result.scores,
+          topInfluencers: result.topInfluencers,
+          modularityScore: result.signals.modularityScore,
+        };
+        // Apply real scores back to entities
+        for (const entity of merged.entities) {
+          const scoreData = result.scores.get(entity.id);
+          if (scoreData) entity.attentionScore = scoreData.score;
+        }
+        // Assign cluster IDs
+        result.clusters.forEach(cluster => {
+          cluster.entities.forEach(eid => {
+            const entity = merged.entities.find(e => e.id === eid);
+            if (entity) entity.clusterId = cluster.id;
+          });
+        });
+        merged.metadata.lastAnalyzed = new Date().toISOString();
+      } catch (e) {
+        console.error('Detection analysis failed after merge:', e);
+        merged.metadata.lastAnalyzed = new Date().toISOString();
+      }
+
       setDataset(merged);
       persistDataset(merged);
-    }
+      setAnalyzing(false);
+    }, 100);
   }, [dataset, persistDataset]);
 
   return {

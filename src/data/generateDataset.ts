@@ -2,7 +2,9 @@ import type {
   Person, Phone, BankAccount, Location, Vehicle, FIR, Organization,
   CDR, Transaction, LocationEvent, Entity, Relationship, EntityType,
   RelationshipType, Anomaly, Cluster, TimelineEvent, Dataset,
+  SocialMediaPost, IntelligenceReport,
 } from '@/types';
+import { analyze } from '@/analytics/detection';
 
 const FIRST_NAMES = ['Arjun', 'Vikram', 'Neha', 'Rohan', 'Priya', 'Karan', 'Aisha', 'Dev', 'Meera', 'Sanjay', 'Riya', 'Aditya', 'Kavya', 'Rahul', 'Ananya', 'Vivek', 'Pooja', 'Manish', 'Sneha', 'Rajesh', 'Divya', 'Amit', 'Shreya', 'Nikhil', 'Tara', 'Kabir', 'Isha', 'Arnav', 'Nisha', 'Dhruv', 'Ritu', 'Sahil', 'Anjali', 'Yash', 'Maya', 'Gaurav', 'Lena', 'Faisal', 'Zara', 'Imran', 'Rohan', 'Sara', 'Veer', 'Mira', 'Akash', 'Nadia', 'Suresh', 'Bhavna', 'Tarun', 'Ramesh', 'Geeta', 'Anil', 'Sunita', 'Kiran', 'Mahesh', 'Lata', 'Prakash'];
 const LAST_NAMES = ['Mehta', 'Shah', 'Verma', 'Kapoor', 'Nair', 'Reddy', 'Singh', 'Iyer', 'Gupta', 'Joshi', 'Rao', 'Malhotra', 'Chopra', 'Bose', 'Das', 'Khan', 'Pillai', 'Banerjee', 'Mishra', 'Agarwal', 'Saxena', 'Bhat', 'Menon', 'Trivedi'];
@@ -11,6 +13,9 @@ const LOCATIONS_LIST = ['Sector 12 Market', 'Warehouse North', 'Transit Hub 3', 
 const BANKS = ['HDFC', 'SBI', 'ICICI', 'Axis', 'PNB', 'Canara', 'BoB', 'Kotak'];
 const VEHICLE_TYPES = ['Sedan', 'SUV', 'Truck', 'Van', 'Motorcycle', 'Pickup'];
 const CARRIERS = ['Airtel', 'Jio', 'Vi', 'BSNL'];
+const PLATFORMS = ['Twitter', 'WhatsApp', 'Telegram', 'Instagram', 'Facebook'];
+const INTEL_SOURCES = ['RAW Field Report', 'State Intelligence Bureau', 'NIA Technical Division', 'Cyber Cell Analysis', 'Financial Intelligence Unit', 'Border Security Input'];
+const SENTIMENTS: Array<'positive' | 'negative' | 'neutral'> = ['positive', 'negative', 'neutral'];
 
 function seeded(seed: number) {
   let s = seed;
@@ -29,7 +34,6 @@ const pickN = <T,>(arr: T[], n: number): T[] => {
   return out;
 };
 const randInt = (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
-const randFloat = (min: number, max: number) => rng() * (max - min) + min;
 
 function pad(n: number, len: number) {
   return String(n).padStart(len, '0');
@@ -128,8 +132,63 @@ export function generateDataset(): Dataset {
     });
   }
 
+  // 25 social media posts
+  const socialMediaPosts: SocialMediaPost[] = [];
+  const postTemplates = [
+    'Met at {location} today. Business looks promising.',
+    'Package dispatched from {location}. Tracking in progress.',
+    'Need to discuss the {location} matter urgently.',
+    'Transfer completed. Check with contact at {location}.',
+    'Meeting confirmed for next week near {location}.',
+    'Shipment arrived at {location}. Quality check pending.',
+    'Avoid {location} area — too much surveillance lately.',
+    'New contact established through {location} connection.',
+    'Payment received. Will visit {location} tomorrow.',
+    'Status update: {location} operation on track.',
+  ];
+  for (let i = 1; i <= 25; i++) {
+    const author = pick(persons).id;
+    socialMediaPosts.push({
+      id: `SMP-${pad(i, 3)}`,
+      author,
+      platform: pick(PLATFORMS),
+      content: pick(postTemplates).replace('{location}', pick(LOCATIONS_LIST).toLowerCase()),
+      timestamp: ts(randInt(0, 60)),
+      mentions: pickN(persons.map(p => p.id), randInt(0, 3)),
+      sentiment: pick(SENTIMENTS),
+    });
+  }
+
+  // 10 intelligence reports
+  const intelligenceReports: IntelligenceReport[] = [];
+  const reportTitles = [
+    'Surveillance Summary — Cross-District Activity',
+    'Financial Flow Analysis — Suspicious Transfers',
+    'Communication Intercept Summary',
+    'Location Pattern Analysis — Meeting Points',
+    'Vehicle Movement Tracking Report',
+    'Network Infiltration Assessment',
+    'Hawala Transaction Pattern Detected',
+    'Cross-Border Movement Intelligence',
+    'Digital Footprint Analysis — Key Suspects',
+    'Operational Security Assessment',
+  ];
+  for (let i = 1; i <= 10; i++) {
+    const involved = pickN(persons.map(p => p.id), randInt(3, 6));
+    intelligenceReports.push({
+      id: `INT-${pad(i, 3)}`,
+      title: reportTitles[i - 1],
+      source: pick(INTEL_SOURCES),
+      date: ts(randInt(1, 90)),
+      content: `Intelligence report regarding activity of entities: ${involved.join(', ')}. Analysis indicates coordinated pattern across multiple locations and communication channels. Recommend continued monitoring and cross-referencing with financial records.`,
+      entities: involved,
+      reliability: pick(['A', 'B', 'C', 'D'] as const),
+      classification: pick(['verified', 'probably_true', 'possibly_true'] as const),
+    });
+  }
+
   // Define clusters: 6 groups of 10 persons
-  const clusters: { personIds: string[]; name: string; description: string; dominantType: EntityType }[] = [
+  const clusterDefs: { personIds: string[]; name: string; description: string; dominantType: EntityType }[] = [
     { personIds: persons.slice(0, 10).map(p => p.id), name: 'Cluster Alpha', description: 'High-frequency communication group', dominantType: 'person' },
     { personIds: persons.slice(10, 20).map(p => p.id), name: 'Cluster Beta', description: 'Shared location pattern group', dominantType: 'person' },
     { personIds: persons.slice(20, 30).map(p => p.id), name: 'Cluster Gamma', description: 'Financial transaction network', dominantType: 'person' },
@@ -138,20 +197,11 @@ export function generateDataset(): Dataset {
     { personIds: persons.slice(50, 60).map(p => p.id), name: 'Cluster Zeta', description: 'Case association group', dominantType: 'person' },
   ];
 
-  // Assign cluster IDs to persons
-  clusters.forEach((c, ci) => {
-    c.personIds.forEach(pid => {
-      const p = persons.find(pp => pp.id === pid);
-      if (p) (p as any).clusterId = ci;
-    });
-  });
-
   // Generate CDRs - heavy within clusters, sparse across
   for (let i = 0; i < 550; i++) {
     let caller: string, receiver: string;
     if (rng() < 0.7) {
-      // within cluster
-      const c = clusters[Math.floor(rng() * clusters.length)];
+      const c = clusterDefs[Math.floor(rng() * clusterDefs.length)];
       caller = pick(c.personIds);
       receiver = pick(c.personIds);
       while (receiver === caller) receiver = pick(c.personIds);
@@ -170,7 +220,7 @@ export function generateDataset(): Dataset {
     });
   }
 
-  // Plant communication anomaly: P001 makes 47 calls in 24h to P002
+  // Plant communication anomaly: P001 makes 47 calls in 24h
   const anomalyDay = randInt(1, 30);
   for (let i = 0; i < 47; i++) {
     cdrs.push({
@@ -184,11 +234,11 @@ export function generateDataset(): Dataset {
     });
   }
 
-  // Generate transactions - 300+
+  // Generate transactions
   for (let i = 0; i < 320; i++) {
     let sender: string, receiver: string;
     if (rng() < 0.65) {
-      const c = clusters[Math.floor(rng() * clusters.length)];
+      const c = clusterDefs[Math.floor(rng() * clusterDefs.length)];
       sender = pick(c.personIds);
       receiver = pick(c.personIds);
       while (receiver === sender) receiver = pick(c.personIds);
@@ -207,31 +257,15 @@ export function generateDataset(): Dataset {
     });
   }
 
-  // Plant transaction anomaly: P011 sends 850000
-  transactions.push({
-    id: 'TXN-ANOM-001',
-    sender: 'P011',
-    receiver: 'P012',
-    amount: 850000,
-    timestamp: ts(randInt(0, 30)),
-    location: 'LOC-02',
-    transactionType: 'transfer',
-  });
-  transactions.push({
-    id: 'TXN-ANOM-002',
-    sender: 'P011',
-    receiver: 'P013',
-    amount: 1200000,
-    timestamp: ts(randInt(0, 30)),
-    location: 'LOC-02',
-    transactionType: 'transfer',
-  });
+  // Plant transaction anomaly
+  transactions.push({ id: 'TXN-ANOM-001', sender: 'P011', receiver: 'P012', amount: 850000, timestamp: ts(randInt(0, 30)), location: 'LOC-02', transactionType: 'transfer' });
+  transactions.push({ id: 'TXN-ANOM-002', sender: 'P011', receiver: 'P013', amount: 1200000, timestamp: ts(randInt(0, 30)), location: 'LOC-02', transactionType: 'transfer' });
 
-  // Location events - 200+
+  // Location events
   for (let i = 0; i < 220; i++) {
     let entity: string;
     if (rng() < 0.6) {
-      const c = clusters[Math.floor(rng() * clusters.length)];
+      const c = clusterDefs[Math.floor(rng() * clusterDefs.length)];
       entity = pick(c.personIds);
     } else {
       entity = `P${pad(randInt(1, 60), 3)}`;
@@ -245,16 +279,9 @@ export function generateDataset(): Dataset {
     });
   }
 
-  // Plant location anomaly: P021, P022, P023 all at LOC-05 within 2 hours
-  const locAnomalyTime = ts(randInt(0, 20), 14);
+  // Plant location anomaly
   ['P021', 'P022', 'P023', 'P024'].forEach((pid, idx) => {
-    locationEvents.push({
-      id: `LOC-ANOM-${pad(idx, 2)}`,
-      entity: pid,
-      location: 'LOC-05',
-      timestamp: ts(randInt(0, 20), 14 + idx),
-      eventType: 'meeting',
-    });
+    locationEvents.push({ id: `LOC-ANOM-${pad(idx, 2)}`, entity: pid, location: 'LOC-05', timestamp: ts(randInt(0, 20), 14 + idx), eventType: 'meeting' });
   });
 
   // Build entities array
@@ -266,16 +293,10 @@ export function generateDataset(): Dataset {
   vehicles.forEach(v => entities.push({ id: v.id, type: 'vehicle', label: v.id, attributes: { type: v.type, owner: v.owner, registration: v.registration } }));
   firs.forEach(f => entities.push({ id: f.id, type: 'fir', label: f.id, attributes: { title: f.title, date: f.date, section: f.section, status: f.status } }));
   organizations.forEach(o => entities.push({ id: o.id, type: 'organization', label: o.name, name: o.name, attributes: { type: o.type } }));
+  socialMediaPosts.forEach(s => entities.push({ id: s.id, type: 'social_media_post', label: s.content.slice(0, 40) + '...', attributes: { platform: s.platform, author: s.author, sentiment: s.sentiment ?? 'neutral' } }));
+  intelligenceReports.forEach(r => entities.push({ id: r.id, type: 'intelligence_report', label: r.title, attributes: { source: r.source, reliability: r.reliability, classification: r.classification } }));
 
-  // Assign cluster IDs to entities
-  clusters.forEach((c, ci) => {
-    c.personIds.forEach(pid => {
-      const e = entities.find(en => en.id === pid);
-      if (e) e.clusterId = ci;
-    });
-  });
-
-  // Build relationships from CDRs, transactions, location events, FIRs, vehicles
+  // Build relationships
   const relationships: Relationship[] = [];
   const relMap = new Map<string, Relationship>();
 
@@ -300,45 +321,39 @@ export function generateDataset(): Dataset {
     }
   };
 
+  // CDR relationships
   cdrs.forEach(c => {
     addRel(c.caller, c.receiver, 'called', c.duration > 300 ? 'high' : c.duration > 120 ? 'medium' : 'low', c.timestamp, { duration: c.duration, location: c.location });
   });
 
+  // Transaction relationships
   transactions.forEach(t => {
     addRel(t.sender, t.receiver, 'transacted', t.amount > 30000 ? 'high' : t.amount > 10000 ? 'medium' : 'low', t.timestamp, { amount: t.amount, type: t.transactionType, location: t.location });
   });
 
-  // Location events -> located_at relationships
-  const locByEntity = new Map<string, Set<string>>();
+  // Location events
   locationEvents.forEach(le => {
     addRel(le.entity, le.location, 'located_at', 'medium', le.timestamp, { eventType: le.eventType });
-    if (!locByEntity.has(le.entity)) locByEntity.set(le.entity, new Set());
-    locByEntity.get(le.entity)!.add(le.location);
   });
 
-  // Shared locations: if two entities at same location within short window
+  // Co-location connected_to
   const locByTimeLoc = new Map<string, string[]>();
   locationEvents.forEach(le => {
     const key = `${le.location}-${le.timestamp.slice(0, 13)}`;
     if (!locByTimeLoc.has(key)) locByTimeLoc.set(key, []);
     locByTimeLoc.get(key)!.push(le.entity);
   });
-  locByTimeLoc.forEach(entities2 => {
-    if (entities2.length > 1) {
-      for (let i = 0; i < entities2.length; i++) {
-        for (let j = i + 1; j < entities2.length; j++) {
-          if (entities2[i] !== entities2[j]) addRel(entities2[i], entities2[j], 'connected_to', 'low');
-        }
+  locByTimeLoc.forEach(ents => {
+    for (let i = 0; i < ents.length; i++) {
+      for (let j = i + 1; j < ents.length; j++) {
+        if (ents[i] !== ents[j]) addRel(ents[i], ents[j], 'connected_to', 'low');
       }
     }
   });
 
   // FIR associations
   firs.forEach(f => {
-    f.entities.forEach(eid => {
-      addRel(eid, f.id, 'mentioned_in', 'high', f.date, { title: f.title, section: f.section });
-    });
-    // connect entities in same FIR
+    f.entities.forEach(eid => addRel(eid, f.id, 'mentioned_in', 'high', f.date, { title: f.title, section: f.section }));
     for (let i = 0; i < f.entities.length; i++) {
       for (let j = i + 1; j < f.entities.length; j++) {
         addRel(f.entities[i], f.entities[j], 'associated', 'medium');
@@ -347,198 +362,116 @@ export function generateDataset(): Dataset {
   });
 
   // Vehicle sharing
-  vehicles.forEach(v => {
-    addRel(v.owner, v.id, 'shared_vehicle', 'medium', undefined, { type: v.type, registration: v.registration });
-  });
-  // Some vehicles shared between cluster members
+  vehicles.forEach(v => addRel(v.owner, v.id, 'shared_vehicle', 'medium', undefined, { type: v.type, registration: v.registration }));
   for (let i = 0; i < 8; i++) {
-    const c = clusters[Math.floor(rng() * clusters.length)];
+    const c = clusterDefs[Math.floor(rng() * clusterDefs.length)];
     const v = vehicles[randInt(0, vehicles.length - 1)];
     const p = pick(c.personIds);
     if (p !== v.owner) addRel(p, v.id, 'shared_vehicle', 'medium');
   }
 
-  // Phone ownership
-  phones.forEach(p => {
-    addRel(p.owner, p.id, 'connected_to', 'high', undefined, { carrier: p.carrier });
-  });
-
-  // Bank ownership
-  banks.forEach(b => {
-    addRel(b.owner, b.id, 'connected_to', 'high', undefined, { bank: b.bank, balance: b.balance });
-  });
+  // Phone & bank ownership
+  phones.forEach(p => addRel(p.owner, p.id, 'connected_to', 'high', undefined, { carrier: p.carrier }));
+  banks.forEach(b => addRel(b.owner, b.id, 'connected_to', 'high', undefined, { bank: b.bank, balance: b.balance }));
 
   // Organization associations
   organizations.forEach(o => {
-    const members = pickN(persons.map(p => p.id), randInt(2, 4));
-    members.forEach(m => addRel(m, o.id, 'associated', 'medium'));
+    pickN(persons.map(p => p.id), randInt(2, 4)).forEach(m => addRel(m, o.id, 'associated', 'medium'));
+  });
+
+  // Social media relationships
+  socialMediaPosts.forEach(s => {
+    addRel(s.author, s.id, 'posted_by', 'medium', s.timestamp, { platform: s.platform });
+    s.mentions.forEach(m => addRel(s.id, m, 'cites', 'low', s.timestamp));
+  });
+
+  // Intelligence report relationships
+  intelligenceReports.forEach(r => {
+    r.entities.forEach(eid => addRel(eid, r.id, 'authored_by', 'high', r.date, { source: r.source, reliability: r.reliability }));
   });
 
   // Cross-cluster bridges
-  for (let i = 0; i < clusters.length; i++) {
-    const next = (i + 1) % clusters.length;
-    const a = pick(clusters[i].personIds);
-    const b = pick(clusters[next].personIds);
+  for (let i = 0; i < clusterDefs.length; i++) {
+    const next = (i + 1) % clusterDefs.length;
+    const a = pick(clusterDefs[i].personIds);
+    const b = pick(clusterDefs[next].personIds);
     addRel(a, b, 'connected_to', 'high');
-    // Add a few calls/transactions across
     for (let k = 0; k < 3; k++) {
       cdrs.push({ id: `CDR-BRIDGE-${i}-${k}`, caller: a, receiver: b, timestamp: ts(randInt(0, 60)), duration: randInt(60, 400), location: 'LOC-01', callType: 'outgoing' });
       addRel(a, b, 'called', 'high', ts(randInt(0, 60)), { duration: randInt(60, 400) });
     }
   }
 
-  // Compute attention scores
-  const degreeMap = new Map<string, number>();
-  relationships.forEach(r => {
-    degreeMap.set(r.source, (degreeMap.get(r.source) ?? 0) + 1);
-    degreeMap.set(r.target, (degreeMap.get(r.target) ?? 0) + 1);
-  });
-  entities.forEach(e => {
-    let score = 0;
-    const deg = degreeMap.get(e.id) ?? 0;
-    score += Math.min(deg * 2, 40);
-    // anomaly bonus
-    // (will be applied after anomalies computed)
-    e.attentionScore = Math.min(score, 60);
-  });
-
-  // Build clusters output
-  const clusterOut: Cluster[] = clusters.map((c, i) => ({
-    id: i,
-    name: c.name,
-    entities: c.personIds,
-    description: c.description,
-    dominantType: c.dominantType,
-  }));
-
-  // Detect anomalies
-  const anomalies: Anomaly[] = [];
-
-  // Communication anomaly: P001 burst
-  anomalies.push({
-    id: 'ANOM-001',
-    type: 'communication',
-    severity: 'high',
-    entity: 'P001',
-    title: 'Unusual Communication Frequency',
-    description: 'Entity P001 made 47 outgoing calls within a 24-hour period, significantly exceeding the normal range of 2-3 calls per week observed for this entity.',
-    timestamp: ts(anomalyDay, 12),
-    relatedEntities: ['P002', 'P003', 'P004', 'P005'],
-    value: 47,
-    expectedRange: '2-3 calls/week',
-  });
-
-  // Transaction anomaly: P011 large transfers
-  anomalies.push({
-    id: 'ANOM-002',
-    type: 'transaction',
-    severity: 'high',
-    entity: 'P011',
-    title: 'Unusual Transaction Amount',
-    description: 'Entity P011 initiated transactions of ₹850,000 and ₹1,200,000, significantly exceeding the normal transaction range of ₹1,000-₹50,000 for this entity.',
-    timestamp: ts(randInt(0, 30), 15),
-    relatedEntities: ['P012', 'P013'],
-    value: 1200000,
-    expectedRange: '₹1,000 - ₹50,000',
-  });
-
-  // Location anomaly: shared location
-  anomalies.push({
-    id: 'ANOM-003',
-    type: 'location',
-    severity: 'medium',
-    entity: 'P021',
-    title: 'Potential Shared-Location Pattern',
-    description: 'Entities P021, P022, P023, and P024 all appeared at Warehouse North (LOC-05) within a 4-hour window. This co-location pattern may warrant further review.',
-    timestamp: ts(randInt(0, 20), 14),
-    relatedEntities: ['P022', 'P023', 'P024'],
-    expectedRange: 'No prior co-location history',
-  });
-
-  // Network anomaly: high-degree bridge entity
-  anomalies.push({
-    id: 'ANOM-004',
-    type: 'network',
-    severity: 'medium',
-    entity: 'P031',
-    title: 'Cross-Cluster Bridge Entity',
-    description: 'Entity P031 maintains high-connectivity relationships across multiple clusters, acting as a potential bridge between otherwise disconnected groups.',
-    timestamp: ts(0, 10),
-    relatedEntities: ['P030', 'P032', 'P040'],
-  });
-
-  // Apply anomaly bonus to attention scores
-  anomalies.forEach(a => {
-    const e = entities.find(en => en.id === a.entity);
-    if (e) e.attentionScore = Math.min((e.attentionScore ?? 0) + (a.severity === 'high' ? 25 : 15), 100);
-  });
-
-  // Boost bridge entities
-  for (let i = 0; i < clusters.length; i++) {
-    const next = (i + 1) % clusters.length;
-    const a = pick(clusters[i].personIds);
-    const e = entities.find(en => en.id === a);
-    if (e) e.attentionScore = Math.min((e.attentionScore ?? 0) + 10, 100);
-  }
-
-  // Build timeline
+  // Build preliminary dataset (without real analysis yet)
   const timeline: TimelineEvent[] = [];
   cdrs.slice(0, 100).forEach(c => {
-    timeline.push({
-      id: `TL-${c.id}`,
-      timestamp: c.timestamp,
-      type: 'call',
-      entity: c.caller,
-      description: `${c.caller} called ${c.receiver} (${c.duration}s)`,
-      relatedEntities: [c.receiver],
-      location: c.location,
-    });
+    timeline.push({ id: `TL-${c.id}`, timestamp: c.timestamp, type: 'call', entity: c.caller, description: `${c.caller} called ${c.receiver} (${c.duration}s)`, relatedEntities: [c.receiver], location: c.location });
   });
   transactions.slice(0, 80).forEach(t => {
-    timeline.push({
-      id: `TL-${t.id}`,
-      timestamp: t.timestamp,
-      type: 'transaction',
-      entity: t.sender,
-      description: `${t.sender} transacted ₹${t.amount.toLocaleString('en-IN')} with ${t.receiver}`,
-      relatedEntities: [t.receiver],
-      location: t.location,
-    });
+    timeline.push({ id: `TL-${t.id}`, timestamp: t.timestamp, type: 'transaction', entity: t.sender, description: `${t.sender} transacted ₹${t.amount.toLocaleString('en-IN')} with ${t.receiver}`, relatedEntities: [t.receiver], location: t.location });
   });
   locationEvents.slice(0, 60).forEach(le => {
-    timeline.push({
-      id: `TL-${le.id}`,
-      timestamp: le.timestamp,
-      type: 'location',
-      entity: le.entity,
-      description: `${le.entity} appeared at ${le.location} (${le.eventType})`,
-      relatedEntities: [],
-      location: le.location,
-    });
+    timeline.push({ id: `TL-${le.id}`, timestamp: le.timestamp, type: 'location', entity: le.entity, description: `${le.entity} appeared at ${le.location} (${le.eventType})`, relatedEntities: [], location: le.location });
   });
   firs.forEach(f => {
-    timeline.push({
-      id: `TL-${f.id}`,
-      timestamp: f.date,
-      type: 'case',
-      entity: f.entities[0] ?? '',
-      description: `FIR ${f.id} filed: ${f.title}`,
-      relatedEntities: f.entities.slice(1),
-    });
+    timeline.push({ id: `TL-${f.id}`, timestamp: f.date, type: 'case', entity: f.entities[0] ?? '', description: `FIR ${f.id} filed: ${f.title}`, relatedEntities: f.entities.slice(1) });
+  });
+  socialMediaPosts.slice(0, 20).forEach(s => {
+    timeline.push({ id: `TL-${s.id}`, timestamp: s.timestamp, type: 'meeting', entity: s.author, description: `Social post on ${s.platform}: "${s.content.slice(0, 60)}..."`, relatedEntities: s.mentions });
   });
   timeline.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  return {
+  // Build preliminary dataset, then run real detection
+  const preliminary: Dataset = {
     persons, phones, banks, locations, vehicles, firs, organizations,
+    socialMediaPosts, intelligenceReports,
     cdrs, transactions, locationEvents,
     entities, relationships,
-    clusters: clusterOut,
-    anomalies,
+    clusters: [],
+    anomalies: [],
     timeline,
+    analysisResult: { attentionScores: null, topInfluencers: [], modularityScore: 0 },
     metadata: {
       createdAt: new Date().toISOString(),
       lastAnalyzed: null,
       source: 'demo',
     },
   };
+
+  // Run the REAL detection engine from detection.ts
+  const result = analyze(preliminary);
+
+  // Apply real analysis results back to the dataset
+  const finalDataset: Dataset = {
+    ...preliminary,
+    clusters: result.clusters,
+    anomalies: result.anomalies,
+    analysisResult: {
+      attentionScores: result.scores,
+      topInfluencers: result.topInfluencers,
+      modularityScore: result.signals.modularityScore,
+    },
+    metadata: {
+      ...preliminary.metadata,
+      lastAnalyzed: new Date().toISOString(),
+    },
+  };
+
+  // Update entity scores and cluster assignments from real analysis
+  for (const entity of finalDataset.entities) {
+    const scoreData = result.scores.get(entity.id);
+    if (scoreData) {
+      entity.attentionScore = scoreData.score;
+    }
+  }
+
+  // Assign cluster IDs from real community detection
+  result.clusters.forEach(cluster => {
+    cluster.entities.forEach(eid => {
+      const entity = finalDataset.entities.find(e => e.id === eid);
+      if (entity) entity.clusterId = cluster.id;
+    });
+  });
+
+  return finalDataset;
 }

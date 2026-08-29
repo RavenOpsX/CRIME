@@ -5,7 +5,9 @@ export type EntityType =
   | 'location'
   | 'vehicle'
   | 'fir'
-  | 'organization';
+  | 'organization'
+  | 'social_media_post'
+  | 'intelligence_report';
 
 export type RelationshipType =
   | 'called'
@@ -14,7 +16,10 @@ export type RelationshipType =
   | 'associated'
   | 'shared_vehicle'
   | 'mentioned_in'
-  | 'connected_to';
+  | 'connected_to'
+  | 'posted_by'
+  | 'authored_by'
+  | 'cites';
 
 export interface Entity {
   id: string;
@@ -147,6 +152,38 @@ export interface TimelineEvent {
   location?: string;
 }
 
+export interface SocialMediaPost {
+  id: string;
+  author: string;
+  platform: string;
+  content: string;
+  timestamp: string;
+  mentions: string[];
+  sentiment?: 'positive' | 'negative' | 'neutral';
+}
+
+export interface IntelligenceReport {
+  id: string;
+  title: string;
+  source: string;
+  date: string;
+  content: string;
+  entities: string[];
+  reliability: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+  classification: 'verified' | 'probably_true' | 'possibly_true' | 'doubtful' | 'impossible_to_judge' | 'checked_but_unable_to_be_judged';
+}
+
+export interface AnalysisResultData {
+  attentionScores: Map<string, { score: number; breakdown: AttentionFactor[] }> | null;
+  topInfluencers: { entityId: string; betweenness: number; pagerank: number; degree: number }[];
+  modularityScore: number;
+}
+
+export interface AttentionFactor {
+  factor: string;
+  points: number;
+}
+
 export interface Dataset {
   persons: Person[];
   phones: Phone[];
@@ -155,6 +192,8 @@ export interface Dataset {
   vehicles: Vehicle[];
   firs: FIR[];
   organizations: Organization[];
+  socialMediaPosts: SocialMediaPost[];
+  intelligenceReports: IntelligenceReport[];
   cdrs: CDR[];
   transactions: Transaction[];
   locationEvents: LocationEvent[];
@@ -163,10 +202,11 @@ export interface Dataset {
   clusters: Cluster[];
   anomalies: Anomaly[];
   timeline: TimelineEvent[];
+  analysisResult: AnalysisResultData;
   metadata: {
     createdAt: string;
     lastAnalyzed: string | null;
-    source: 'demo' | 'csv';
+    source: 'demo' | 'csv' | 'import';
   };
 }
 

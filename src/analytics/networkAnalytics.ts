@@ -122,6 +122,14 @@ export function getEntityTimeline(entityId: string, dataset: Dataset) {
 }
 
 export function getAttentionBreakdown(entityId: string, dataset: Dataset) {
+  // Prefer real detection.ts breakdown if available
+  const realScores = dataset.analysisResult.attentionScores;
+  if (realScores instanceof Map) {
+    const real = realScores.get(entityId);
+    if (real?.breakdown) return real.breakdown.map(b => ({ factor: b.factor, points: b.points }));
+  }
+
+  // Fallback: simplified heuristic breakdown
   const breakdown: { factor: string; points: number }[] = [];
   const conns = getConnections(entityId, dataset);
   const degree = getDegree(entityId, dataset);

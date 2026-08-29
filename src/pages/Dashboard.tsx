@@ -21,6 +21,8 @@ const entityColors: Record<EntityType, string> = {
   vehicle: '#a855f7',
   fir: '#ef4444',
   organization: '#ec4899',
+  social_media_post: '#14b8a6',
+  intelligence_report: '#f97316',
 };
 
 const relColors: Record<RelationshipType, string> = {
@@ -31,6 +33,9 @@ const relColors: Record<RelationshipType, string> = {
   shared_vehicle: '#22c55e',
   mentioned_in: '#ef4444',
   connected_to: '#6b7280',
+  posted_by: '#14b8a6',
+  authored_by: '#f97316',
+  cites: '#14b8a6',
 };
 
 function KPICard({ icon: Icon, label, value, color, delay }: { icon: typeof Users; label: string; value: number; color: string; delay: number }) {
@@ -196,7 +201,42 @@ export function Dashboard() {
             </PieChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div>        {/* Top Influencers from real detection.ts */}
+      {dataset.analysisResult.topInfluencers.length > 0 && (
+        <div className="solid-panel p-4">
+          <h3 className="text-sm font-semibold text-gray-200 mb-3">Top Influencers (Detection Engine)</h3>
+          <div className="space-y-2">
+            {dataset.analysisResult.topInfluencers.slice(0, 6).map(inf => {
+              const ent = dataset.entities.find(e => e.id === inf.entityId);
+              return (
+                <button
+                  key={inf.entityId}
+                  onClick={() => navigate(`/network?entity=${inf.entityId}`)}
+                  className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-ink-900 border border-ink-700 hover:border-accent-500/50 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-accent-600/20 flex items-center justify-center text-accent-400 text-xs font-mono font-bold">
+                    {inf.entityId.slice(-2)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-gray-200 truncate">{ent?.label ?? inf.entityId}</div>
+                    <div className="text-[10px] text-gray-500 font-mono">
+                      Betweenness: {inf.betweenness.toFixed(3)} | PageRank: {inf.pagerank.toFixed(4)} | Degree: {inf.degree}
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono text-accent-400">Score: {ent?.attentionScore ?? 0}</span>
+                </button>
+              );
+            })}
+          </div>
+          {dataset.analysisResult.modularityScore > 0 && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
+              <span>Modularity Score:</span>
+              <span className="font-mono text-gray-300">{dataset.analysisResult.modularityScore.toFixed(4)}</span>
+              <span className="text-gray-600">(higher = stronger community structure)</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Charts row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

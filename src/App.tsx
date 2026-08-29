@@ -9,6 +9,7 @@ import { Alerts } from '@/pages/Alerts';
 import { AIAnalysis } from '@/pages/AIAnalysis';
 import { Reports } from '@/pages/Reports';
 import { SettingsPage } from '@/pages/Settings';
+import { ImportData } from '@/pages/ImportData';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/ai-analysis" element={<AIAnalysis />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/import" element={<ImportData />} />
             <Route path="/settings" element={<SettingsPage />} />
             {/* Unknown paths fall back to the dashboard instead of a blank screen. */}
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -28,6 +28,8 @@ const entityColors: Record<EntityType, string> = {
   vehicle: '#a855f7',
   fir: '#ef4444',
   organization: '#ec4899',
+  social_media_post: '#14b8a6',
+  intelligence_report: '#f97316',
 };
 
 const clusterColors = [
@@ -42,10 +44,13 @@ const relColors: Record<RelationshipType, string> = {
   shared_vehicle: '#22c55e',
   mentioned_in: '#ef4444',
   connected_to: '#6b7280',
+  posted_by: '#14b8a6',
+  authored_by: '#f97316',
+  cites: '#14b8a6',
 };
 
-const entityTypes: EntityType[] = ['person', 'phone', 'bank', 'location', 'vehicle', 'fir', 'organization'];
-const relTypes: RelationshipType[] = ['called', 'transacted', 'located_at', 'associated', 'shared_vehicle', 'mentioned_in', 'connected_to'];
+const entityTypes: EntityType[] = ['person', 'phone', 'bank', 'location', 'vehicle', 'fir', 'organization', 'social_media_post', 'intelligence_report'];
+const relTypes: RelationshipType[] = ['called', 'transacted', 'located_at', 'associated', 'shared_vehicle', 'mentioned_in', 'connected_to', 'posted_by', 'authored_by', 'cites'];
 
 export function NetworkAnalysis() {
   const { dataset, analyzing, loadDemoData } = useDatasetContext();
@@ -180,6 +185,14 @@ export function NetworkAnalysis() {
         {
           selector: 'node[type="organization"]',
           style: { 'shape': 'star' },
+        },
+        {
+          selector: 'node[type="social_media_post"]',
+          style: { 'shape': 'hexagon' },
+        },
+        {
+          selector: 'node[type="intelligence_report"]',
+          style: { 'shape': 'tag' },
         },
         {
           selector: 'edge',

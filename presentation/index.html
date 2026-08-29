@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Powered Criminal Network Analysis — SIH Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg-deep: #060d19;
+    --bg-dark: #0a1628;
+    --bg-panel: #111d33;
+    --bg-card: #152238;
+    --border: #1e3050;
+    --red: #c0392b;
+    --red-glow: #e74c3c;
+    --blue: #2980b9;
+    --blue-glow: #3498db;
+    --green: #27ae60;
+    --amber: #f39c12;
+    --white: #ecf0f1;
+    --gray: #7f8c8d;
+    --gray-light: #bdc3c7;
+    --gray-dark: #2c3e50;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-deep);
+    color: var(--white);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* ── Slide Container ── */
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 60px 80px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    overflow-y: auto;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  /* ── Background Patterns ── */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  .slide-grid::before {
+    background-image:
+      linear-gradient(rgba(41,128,185,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(41,128,185,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .slide-dots::before {
+    background-image: radial-gradient(circle, rgba(41,128,185,0.06) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .slide-crosshair::before {
+    background-image:
+      radial-gradient(circle at 50% 50%, transparent 60%, rgba(192,57,43,0.05) 60%, rgba(192,57,43,0.05) 61%, transparent 61%);
+    background-size: 200px 200px;
+  }
+
+  /* ── Typography ── */
+  .slide-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 22px;
+    color: var(--gray-light);
+    font-weight: 400;
+    margin-bottom: 20px;
+  }
+
+  .tagline {
+    font-size: 28px;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--red-glow);
+    margin-top: 16px;
+  }
+
+  p, li {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--gray-light);
+  }
+
+  .small { font-size: 14px; color: var(--gray); }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Highlight Colors ── */
+  .red { color: var(--red-glow); }
+  .blue { color: var(--blue-glow); }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+  .white { color: var(--white); }
+
+  /* ── Cards & Boxes ── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: var(--blue); }
+
+  .card-red {
+    background: rgba(192,57,43,0.08);
+    border: 1px solid rgba(192,57,43,0.25);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .card-blue {
+    background: rgba(41,128,185,0.08);
+    border: 1px solid rgba(41,128,185,0.25);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+  .grid-6 { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 16px; }
+
+  .icon-box {
+    text-align: center;
+    padding: 28px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .icon-box .icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .icon-box .label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .icon-box .desc {
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  /* ── Stat Block ── */
+  .stat {
+    text-align: center;
+    padding: 20px;
+  }
+  .stat .num {
+    font-size: 42px;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+  }
+  .stat .label {
+    font-size: 13px;
+    color: var(--gray);
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ── Flow Diagram ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .flow-step {
+    flex: 1;
+    text-align: center;
+    padding: 16px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .flow-step .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .flow-arrow {
+    font-size: 22px;
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+
+  /* ── Comparison Table ── */
+  .comparison {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+  .comparison th {
+    text-align: left;
+    padding: 14px 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+  .comparison th:first-child { color: var(--gray); }
+  .comparison th:nth-child(2) { color: var(--green); background: rgba(39,174,96,0.06); border-radius: 8px 0 0 0; }
+  .comparison th:nth-child(3) { color: var(--gray); background: rgba(44,62,80,0.3); border-radius: 0 8px 0 0; }
+  .comparison td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    color: var(--gray-light);
+  }
+  .comparison td:nth-child(2) { color: var(--white); font-weight: 600; background: rgba(39,174,96,0.03); }
+  .comparison td:nth-child(3) { color: var(--gray); }
+
+  /* ── Navigation ── */
+  .nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: rgba(6,13,25,0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 100;
+  }
+  .nav-bar {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .nav-dot.active {
+    background: var(--red);
+    width: 24px;
+    border-radius: 4px;
+  }
+  .nav-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--gray-light);
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { border-color: var(--blue); color: var(--white); }
+  .nav-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gray);
+    letter-spacing: 1px;
+  }
+
+  /* ── Progress Bar ── */
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--blue));
+    z-index: 100;
+    transition: width 0.4s ease;
+  }
+
+  /* ── Corner Logo ── */
+  .corner-badge {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gray);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 100;
+  }
+
+  /* ── Separator ── */
+  .sep {
+    width: 60px;
+    height: 3px;
+    background: var(--red);
+    margin: 16px 0;
+    border-radius: 2px;
+  }
+  .sep-blue { background: var(--blue); }
+  .sep-wide { width: 100%; }
+
+  /* ── List ── */
+  ul.clean { list-style: none; }
+  ul.clean li {
+    padding: 8px 0;
+    padding-left: 20px;
+    position: relative;
+  }
+  ul.clean li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  /* ── Screenshot Placeholder ── */
+  .screenshot {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .screenshot .cam-icon { font-size: 24px; margin-bottom: 8px; opacity: 0.5; }
+  .screenshot .cam-label { font-size: 12px; color: var(--gray); font-weight: 600; }
+  .screenshot .cam-sub { font-size: 10px; color: var(--gray-dark); margin-top: 4px; }
+
+  /* ── Pulse Animation ── */
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .pulse { animation: pulse 2s ease-in-out infinite; }
+
+  /* ── Glow ── */
+  .glow-red { text-shadow: 0 0 20px rgba(231,76,60,0.4); }
+  .glow-blue { text-shadow: 0 0 20px rgba(52,152,219,0.4); }
+
+  /* ── Slide-specific: Title ── */
+  .slide-title {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .slide-title h1 { font-size: 56px; }
+  .slide-title .badge {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 6px 18px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  /* ── Slide-specific: Closing ── */
+  .slide-closing {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* ── Scanline overlay ── */
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 50;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+  }
+
+  /* ── Stat Highlight Row ── */
+  .stat-row {
+    display: flex;
+    gap: 0;
+    margin: 20px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .stat-cell {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-cell .num {
+    font-size: 28px;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .stat-cell .label {
+    font-size: 11px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+
+  /* ── Quote Block ── */
+  .quote {
+    border-left: 3px solid var(--red);
+    padding: 20px 24px;
+    margin: 20px 0;
+    background: rgba(192,57,43,0.05);
+    border-radius: 0 10px 10px 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--gray-light);
+    line-height: 1.5;
+  }
+
+  /* ── Slide 2 stats ── */
+  .problem-stat {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .problem-stat .icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    width: 48px;
+    text-align: center;
+  }
+  .problem-stat .num {
+    font-size: 28px;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+  }
+  .problem-stat .text {
+    font-size: 14px;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+
+  /* ── Data grid cards ── */
+  .data-card {
+    text-align: center;
+    padding: 18px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.3s;
+  }
+  .data-card:hover { border-color: var(--blue); }
+  .data-card .dc-icon { font-size: 28px; margin-bottom: 8px; }
+  .data-card .dc-label { font-size: 13px; font-weight: 700; color: var(--white); }
+  .data-card .dc-desc { font-size: 10px; color: var(--gray); margin-top: 4px; }
+
+  /* ── Algo Cards ── */
+  .algo-card {
+    padding: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    border-top: 3px solid var(--red);
+  }
+  .algo-card:nth-child(2) { border-top-color: var(--blue); }
+  .algo-card:nth-child(3) { border-top-color: var(--green); }
+  .algo-card:nth-child(4) { border-top-color: var(--amber); }
+  .algo-card .algo-icon { font-size: 32px; margin-bottom: 10px; }
+  .algo-card .algo-name {
+    font-size: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .algo-card .algo-desc { font-size: 13px; color: var(--gray); line-height: 1.5; }
+  .algo-card .algo-q {
+    font-size: 12px;
+    color: var(--red);
+    font-weight: 600;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  /* ── Impact Grid ── */
+  .impact-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .impact-item .ii-icon { font-size: 24px; flex-shrink: 0; }
+  .impact-item .ii-text { font-size: 15px; font-weight: 600; color: var(--white); }
+  .impact-item .ii-sub { font-size: 12px; color: var(--gray); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="scanline"></div>
+<div class="corner-badge">SIH 2026 // CONFIDENTIAL</div>
+
+<div class="deck" id="deck">
+
+<!-- ═══════════════════ SLIDE 1: TITLE ═══════════════════ -->
+<div class="slide slide-title slide-dots active" data-slide="1">
+  <div class="badge">Smart India Hackathon 2026 — Finals</div>
+  <h1 class="glow-red">AI-POWERED<br>CRIMINAL NETWORK<br>ANALYSIS</h1>
+  <div class="sep" style="margin: 20px auto;"></div>
+  <p class="subtitle" style="font-size: 26px; font-weight: 500;">
+    See the Invisible. Connect the Disconnected.
+  </p>
+  <p class="small" style="margin-top: 40px; font-size: 14px; color: var(--gray);">
+    Problem Statement # — [Your Team Name] — [College Name]
+  </p>
+</div>
+
+<!-- ═══════════════════ SLIDE 2: PROBLEM ═══════════════════ -->
+<div class="slide slide-grid" data-slide="2">
+  <div class="slide-number">Slide 02 — The Problem</div>
+  <h2>THE INVESTIGATION<br><span class="red">BOTTLENECK</span></h2>
+  <div class="sep"></div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+    <div class="problem-stat">
+      <div class="icon">📋</div>
+      <div>
+        <div class="num red">50L+</div>
+        <div class="text">FIRs filed annually in India — data scattered across disconnected systems</div>
+      </div>
+    </div>
+    <div class="problem-stat">
+      <div class="icon">⏱️</div>
+      <div>
+        <div class="num amber">WEEKS</div>
+        <div class="text">Manual cross-referencing of CDRs, bank records, and surveillance notes</div>
+      </div>
+    </div>
+    <div class="problem-stat">
+      <div class="icon">⚡</div>
+      <div>
+        <div class="num blue">REAL-TIME</div>
+        <div class="text">Criminals operate in real-time — investigators can't keep up with fragmented data</div>
+      </div>
+    </div>
+    <div class="problem-stat">
+      <div class="icon">💰</div>
+      <div>
+        <div class="num" style="color: var(--gray);">₹CRORES+</div>
+        <div class="text">Enterprise tools (Palantir, IBM i2) — inaccessible to 90% of Indian police stations</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote" style="margin-top: 24px;">
+    "The data exists. The connections exist.<br>The tools to find them don't — <span class="red">for those who need them most.</span>"
+  </div>
+</div>
+
+<!-- ═══════════════════ SLIDE 3: SOLUTION ═══════════════════ -->
+<div class="slide slide-grid" data-slide="3">
+  <div class="slide-number">Slide 03 — Our Solution</div>
+  <h2>ONE PLATFORM.<br><span class="blue">EVERY CONNECTION.</span></h2>
+  <div class="sep sep-blue"></div>
+
+  <div class="quote" style="font-size: 22px; margin: 20px 0;">
+    A <span class="green">zero-cost</span>, AI-powered platform that unifies <span class="blue">9 data sources</span> into a single criminal network graph — with <span class="red">explainable, reproducible analysis</span> that runs <span class="white">offline on any laptop</span>.
+  </div>
+
+  <div class="grid-4" style="margin-top: 24px;">
+    <div class="icon-box">
+      <span class="icon">🔗</span>
+      <div class="label">Multi-Source Fusion</div>
+      <div class="desc">9 data types unified into one graph</div>
+    </div>
+    <div class="icon-box">
+      <span class="icon">🧠</span>
+      <div class="label">Explainable AI</div>
+      <div class="desc">Every score has a reason — no black boxes</div>
+    </div>
+    <div class="icon-box">
+      <span class="icon">💻</span>
+      <div class="label">Zero Infrastructure</div>
+      <div class="desc">Runs on any laptop, fully offline</div>
+    </div>
+    <div class="icon-box">
+      <span class="icon">🇮🇳</span>
+      <div class="label">India-Ready</div>
+      <div class="desc">FIRs, ₹ currency, Indian formats</div>
+    </div>
+  </div>
+
+  <p class="small" style="text-align: center; margin-top: 20px;">
+    Built for the <span class="red">Indian law enforcement</span> context — not adapted from Western tools.
+  </p>
+</div>
+
+<!-- ═══════════════════ SLIDE 4: ARCHITECTURE ═══════════════════ -->
+<div class="slide slide-crosshair" data-slide="4">
+  <div class="slide-number">Slide 04 — Architecture</div>
+  <h2>HOW IT WORKS<br><span class="blue">INTELLIGENCE PIPELINE</span></h2>
+  <div class="sep sep-blue"></div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="step-num">STEP 01</div>
+      <div style="font-size: 20px; margin-bottom: 6px;">📥</div>
+      <div>Data Input</div>
+      <div class="small" style="margin-top: 4px;">CSV / JSON / NLP Text</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">STEP 02</div>
+      <div style="font-size: 20px; margin-bottom: 6px;">🔍</div>
+      <div>Entity Extraction</div>
+      <div class="small" style="margin-top: 4px;">9 Entity Types</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">STEP 03</div>
+      <div style="font-size: 20px; margin-bottom: 6px;">🕸️</div>
+      <div>Graph Construction</div>
+      <div class="small" style="margin-top: 4px;">10 Relationship Types</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">STEP 04</div>
+      <div style="font-size: 20px; margin-bottom: 6px;">🧠</div>
+      <div>AI Analysis</div>
+      <div class="small" style="margin-top: 4px;">4 Algorithms</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: var(--blue);">
+      <div class="step-num">STEP 05</div>
+      <div style="font-size: 20px; margin-bottom: 6px;">📊</div>
+      <div>Visualization</div>
+      <div class="small" style="margin-top: 4px;">Graph + Dashboard</div>
+    </div>
+  </div>
+
+  <div class="stat-row" style="margin-top: 24px;">
+    <div class="stat-cell">
+      <div class="num blue">9</div>
+      <div class="label">Entity Types</div>
+    </div>
+    <div class="stat-cell">
+      <div class="num red">10</div>
+      <div class="label">Relationship Types</div>
+    </div>
+    <div class="stat-cell">
+      <div class="num green">4</div>
+      <div class="label">AI Algorithms</div>
+    </div>
+    <div class="stat-cell">
+      <div class="num amber">0</div>
+      <div class="label">Servers Required</div>
+    </div>
+  </div>
+
+  <p class="small" style="text-align: center; margin-top: 16px; color: var(--blue); font-weight: 600;">
+    Entire pipeline runs in-browser — No server. No cloud. No cost.
+  </p>
+</div>
+
+<!-- ═══════════════════ SLIDE 5: DATA MODEL ═══════════════════ -->
+<div class="slide slide-dots" data-slide="5">
+  <div class="slide-number">Slide 05 — Data Model</div>
+  <h2>UNIFIED DATA<br><span class="blue">INTELLIGENCE LAYER</span></h2>
+  <div class="sep sep-blue"></div>
+
+  <div class="grid-5" style="margin-top: 16px;">
+    <div class="data-card"><div class="dc-icon">📋</div><div class="dc-label">FIRs</div><div class="dc-desc">Police Reports</div></div>
+    <div class="data-card"><div class="dc-icon">📞</div><div class="dc-label">CDRs</div><div class="dc-desc">Call Records</div></div>
+    <div class="data-card"><div class="dc-icon">💰</div><div class="dc-label">Transactions</div><div class="dc-desc">Financial Data</div></div>
+    <div class="data-card"><div class="dc-icon">📍</div><div class="dc-label">Locations</div><div class="dc-desc">Surveillance</div></div>
+    <div class="data-card"><div class="dc-icon">🚗</div><div class="dc-label">Vehicles</div><div class="dc-desc">Registration</div></div>
+  </div>
+  <div class="grid-4" style="margin-top: 14px; max-width: 80%;">
+    <div class="data-card"><div class="dc-icon">👥</div><div class="dc-label">Persons</div><div class="dc-desc">Profiles</div></div>
+    <div class="data-card"><div class="dc-icon">🏢</div><div class="dc-label">Organizations</div><div class="dc-desc">Entities</div></div>
+    <div class="data-card"><div class="dc-icon">📱</div><div class="dc-label">Social Media</div><div class="dc-desc">Posts & Mentions</div></div>
+    <div class="data-card"><div class="dc-icon">📄</div><div class="dc-label">Intel Reports</div><div class="dc-desc">Agency Input</div></div>
+  </div>
+
+  <div style="text-align: center; margin-top: 28px;">
+    <div style="font-size: 16px; font-weight: 700; color: var(--gray-light);">
+      <span class="blue">9 Entity Types</span>
+      <span style="color: var(--gray); margin: 0 12px;">→</span>
+      <span class="red">10 Relationship Types</span>
+      <span style="color: var(--gray); margin: 0 12px;">→</span>
+      <span class="green">1 Unified Network</span>
+    </div>
+    <p class="small" style="margin-top: 12px;">Every piece of evidence. Every connection. One graph.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════ SLIDE 6: ENGINE ═══════════════════ -->
+<div class="slide slide-grid" data-slide="6">
+  <div class="slide-number">Slide 06 — The Engine</div>
+  <h2>THE ANALYTICAL<br><span class="red">ENGINE</span></h2>
+  <div class="sep"></div>
+
+  <div class="grid-2" style="margin-top: 12px;">
+    <div class="algo-card">
+      <div class="algo-icon">🕸️</div>
+      <div class="algo-name red">Community Detection</div>
+      <div class="algo-desc">Groups criminals into clusters using weighted label propagation algorithm. Analyzes communication density and financial flows to identify who works together.</div>
+      <div class="algo-q">→ "Who operates in the same criminal cell?"</div>
+    </div>
+    <div class="algo-card">
+      <div class="algo-icon">🌉</div>
+      <div class="algo-name blue">Bridge Detection</div>
+      <div class="algo-desc">Identifies entities with high betweenness centrality — people who connect different criminal groups. These are often the most valuable intelligence targets.</div>
+      <div class="algo-q">→ "Who links separate criminal networks?"</div>
+    </div>
+    <div class="algo-card">
+      <div class="algo-icon">⭐</div>
+      <div class="algo-name" style="color: var(--green);">Influence Scoring</div>
+      <div class="algo-desc">Ranks every entity on a 0-100 attention score using weighted PageRank, degree centrality, anomaly detection, and cross-source evidence breadth.</div>
+      <div class="algo-q">→ "Who is the most analytically significant?"</div>
+    </div>
+    <div class="algo-card">
+      <div class="algo-icon">🚨</div>
+      <div class="algo-name amber">Anomaly Detection</div>
+      <div class="algo-desc">Statistical anomaly detection across four dimensions: communication bursts, transaction outliers, suspicious co-location clusters, and structural bridge entities.</div>
+      <div class="algo-q">→ "What activity deviates from normal patterns?"</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SLIDE 7: DIFFERENTIATORS ═══════════════════ -->
+<div class="slide slide-grid" data-slide="7">
+  <div class="slide-number">Slide 07 — Why Us</div>
+  <h2>WHY WE WIN<br><span class="green">NOT ANOTHER PALANTIR CLONE</span></h2>
+  <div class="sep" style="background: var(--green);"></div>
+
+  <table class="comparison" style="margin-top: 16px;">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>✅ Our Platform</th>
+        <th>Enterprise Tools</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="font-weight: 700;">💰 Cost</td>
+        <td><span class="green">₹0</span> — Fully Open Source</td>
+        <td>₹Crores+ licensing fees</td>
+      </tr>
+      <tr>
+        <td style="font-weight: 700;">🖥️ Infrastructure</td>
+        <td><span class="green">Any laptop</span>, works offline</td>
+        <td>Servers + cloud required</td>
+      </tr>
+      <tr>
+        <td style="font-weight: 700;">🔍 Explainability</td>
+        <td><span class="green">Every score</span> broken down with baselines</td>
+        <td>Black-box ML outputs</td>
+      </tr>
+      <tr>
+        <td style="font-weight: 700;">🇮🇳 India Context</td>
+        <td><span class="green">FIR/section refs</span>, ₹, Indian formats</td>
+        <td>Adapted Western tools</td>
+      </tr>
+      <tr>
+        <td style="font-weight: 700;">🔬 Reproducibility</td>
+        <td><span class="green">Deterministic</span> — same data = same results</td>
+        <td>ML models vary each run</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="quote" style="margin-top: 24px; border-left-color: var(--green); background: rgba(39,174,96,0.05);">
+    "We didn't build a Palantir clone. We built <span class="green">what Indian police actually need</span>."
+  </div>
+</div>
+
+<!-- ═══════════════════ SLIDE 8: DEMO ═══════════════════ -->
+<div class="slide slide-dots" data-slide="8">
+  <div class="slide-number">Slide 08 — Live Demo</div>
+  <h2>LIVE DEMO<br><span class="blue">SEE IT IN ACTION</span></h2>
+  <div class="sep sep-blue"></div>
+
+  <div class="grid-6" style="flex: 1;">
+    <div class="screenshot">
+      <div class="cam-icon">📊</div>
+      <div class="cam-label">Dashboard Overview</div>
+      <div class="cam-sub">Entity counts, cluster stats, alert feed</div>
+    </div>
+    <div class="screenshot" style="border-color: var(--blue);">
+      <div class="cam-icon">🕸️</div>
+      <div class="cam-label">Network Graph</div>
+      <div class="cam-sub">Interactive clusters, click-to-inspect entities</div>
+    </div>
+    <div class="screenshot" style="border-color: var(--red);">
+      <div class="cam-icon">🚨</div>
+      <div class="cam-label">Anomaly Alerts</div>
+      <div class="cam-sub">Auto-detected suspicious patterns</div>
+    </div>
+    <div class="screenshot" style="border-color: var(--green);">
+      <div class="cam-icon">🧠</div>
+      <div class="cam-label">AI Analysis</div>
+      <div class="cam-sub">Natural language investigation summary</div>
+    </div>
+    <div class="screenshot" style="border-color: var(--amber);">
+      <div class="cam-icon">📥</div>
+      <div class="cam-label">Data Import</div>
+      <div class="cam-sub">Drag-and-drop CSV upload</div>
+    </div>
+    <div class="screenshot">
+      <div class="cam-icon">📝</div>
+      <div class="cam-label">Text Analysis</div>
+      <div class="cam-sub">NLP extraction from police reports</div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 16px;">
+    <span class="badge" style="display: inline-block; background: var(--green); color: white; font-size: 13px; font-weight: 700; letter-spacing: 2px; padding: 8px 24px; border-radius: 6px;">
+      ALL RUNNING IN-BROWSER — ZERO BACKEND
+    </span>
+  </div>
+</div>
+
+<!-- ═══════════════════ SLIDE 9: IMPACT ═══════════════════ -->
+<div class="slide slide-grid" data-slide="9">
+  <div class="slide-number">Slide 09 — Impact</div>
+  <h2>IMPACT &<br><span class="green">DEPLOYMENT</span></h2>
+  <div class="sep" style="background: var(--green);"></div>
+
+  <div class="grid-2" style="margin-top: 12px;">
+    <div>
+      <h3 style="color: var(--green); text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 16px;">Key Metrics</h3>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="impact-item">
+          <div class="ii-icon">⏱️</div>
+          <div>
+            <div class="ii-text"><span class="amber">WEEKS</span> → <span class="green">SECONDS</span></div>
+            <div class="ii-sub">Investigation time reduced dramatically</div>
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="ii-icon">📊</div>
+          <div>
+            <div class="ii-text"><span class="blue">60+ persons</span>, 550+ calls, 320+ txns</div>
+            <div class="ii-sub">Demo dataset analyzed in real-time</div>
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="ii-icon">🔍</div>
+          <div>
+            <div class="ii-text">Hidden connections found <span class="green">automatically</span></div>
+            <div class="ii-sub">That manual analysis misses</div>
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="ii-icon">💸</div>
+          <div>
+            <div class="ii-text"><span class="green">₹0</span> vs <span style="color: var(--gray);">₹Crores+</span></div>
+            <div class="ii-sub">Cost savings vs enterprise alternatives</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="color: var(--blue); text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 16px;">Target Deployment</h3>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="impact-item">
+          <div class="ii-icon">🏛️</div>
+          <div>
+            <div class="ii-text">State Police Cyber Cells</div>
+            <div class="ii-sub">Real-time analysis for active investigations</div>
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="ii-icon">🔎</div>
+          <div>
+            <div class="ii-text">NIA / ED / CBI Units</div>
+            <div class="ii-sub">Cross-state criminal network mapping</div>
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="ii-icon">📡</div>
+          <div>
+            <div class="ii-text">State Intelligence Bureaus</div>
+            <div class="ii-sub">Proactive pattern monitoring</div>
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="ii-icon">🏘️</div>
+          <div>
+            <div class="ii-text">District Investigators</div>
+            <div class="ii-sub">Offline-capable, no internet required</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 16px; padding: 16px;">
+        <h3 style="font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Future Scope</h3>
+        <p style="font-size: 13px; color: var(--gray-light);">
+          Real-time CDR monitoring • PDF court reports • Multi-language support • Network evolution timeline
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SLIDE 10: CLOSING ═══════════════════ -->
+<div class="slide slide-closing slide-dots" data-slide="10">
+  <div class="slide-number">Slide 10 — Closing</div>
+  <h1 class="glow-red" style="font-size: 48px; margin-bottom: 24px;">
+    GIVING INVESTIGATORS<br><span class="blue">X-RAY VISION</span>
+  </h1>
+  <div class="sep" style="margin: 0 auto 28px;"></div>
+
+  <div class="quote" style="max-width: 700px; font-size: 24px; text-align: center; border-left: none; border-top: 3px solid var(--red); border-bottom: 3px solid var(--red); border-radius: 0; padding: 30px;">
+    "In India, data is not the problem.<br>
+    <span class="red">Connecting it is.</span><br><br>
+    We built the tool to do exactly that —<br>
+    for <span class="green">free</span>, for <span class="blue">everyone</span>,<br>
+    with full <span class="white">transparency</span>."
+  </div>
+
+  <div style="margin-top: 36px; text-align: center;">
+    <p style="font-size: 16px; color: var(--gray); margin-bottom: 8px;">
+      [Team Name] — [College Name] — SIH 2026
+    </p>
+    <p style="font-size: 13px; color: var(--gray);">
+      [your-email] • [github-repo]
+    </p>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <span class="badge pulse" style="display: inline-block; background: var(--red); color: white; font-size: 16px; font-weight: 800; letter-spacing: 2px; padding: 12px 32px; border-radius: 6px;">
+      WE'RE NOT REPLACING INVESTIGATORS.<br>WE'RE GIVING THEM SUPERPOWERS.
+    </span>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- ── Navigation ── -->
+<div class="nav">
+  <button class="nav-btn" onclick="prev()">◀ PREV</button>
+  <div class="nav-bar" id="navBar"></div>
+  <button class="nav-btn" onclick="next()">NEXT ▶</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  // Build nav dots
+  const navBar = document.getElementById('navBar');
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    navBar.appendChild(dot);
+  }
+
+  function goTo(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    navBar.children[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    navBar.children[current].classList.add('active');
+    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+    // Number keys 1-9 for quick jump
+    const num = parseInt(e.key);
+    if (num >= 1 && num <= total) { e.preventDefault(); goTo(num - 1); }
+  });
+
+  // Initialize progress
+  document.getElementById('progress').style.width = (1 / total * 100) + '%';
+</script>
+
+</body>
+</html>
