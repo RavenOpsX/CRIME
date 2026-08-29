@@ -11,6 +11,8 @@ export function Layout() {
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-40 bg-ink-900/90 backdrop-blur-md border-b border-ink-700 px-6 py-3 flex items-center justify-between">
+          <h1>THREADLINE</h1>
+          <h2>AI Powered Criminal Network Analysis</h2>
           <GlobalSearch dataset={dataset} />
           <div className="flex items-center gap-4">
             {dataset ? (
