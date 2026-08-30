@@ -1,0 +1,9 @@
+id,title,date,section,status,entities
+F001,Mob Extortion Racket,2024-01-10,IPC 384,open,"P001,P002,P006"
+F002,Money Laundering Case,2024-01-12,PMLA,under_investigation,"P001,P009,P010"
+F003,Illegal Gambling Den,2024-01-14,IPC 3,open,"P002,P003"
+F004,Fraud Complaint,2024-01-15,IPC 420,open,"P006,P008"
+F005,Missing Person Report,2024-01-16,IPC 346,closed,"P007"
+F006,Assault Case,2024-01-18,IPC 325,under_investigation,"P004,P010"
+F007,Vehicle Theft,2024-01-19,IPC 379,open,"P008"
+F008,Drug Trafficking,2024-01-20,NDPS,open,"P001,P002,P009"

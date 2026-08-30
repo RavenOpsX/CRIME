@@ -67,6 +67,7 @@ export function NetworkAnalysis() {
   const [visibleRelTypes, setVisibleRelTypes] = useState<Set<RelationshipType>>(new Set(relTypes));
   const [minAttention, setMinAttention] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [layout, setLayout] = useState<string>('cose');
   // Bumped every time a new cytoscape instance is built, so the selection effects
   // below re-apply their classes to the fresh instance.
   const [graphInstance, setGraphInstance] = useState(0);
@@ -258,7 +259,7 @@ export function NetworkAnalysis() {
           },
         },
       ],
-      layout: { name: 'cose', animate: true, animationDuration: 500, idealEdgeLength: 80, nodeRepulsion: 8000, padding: 40 },
+      layout: { name: 'cose', animate: true, animationDuration: 800, idealEdgeLength: 150, nodeRepulsion: 45000, nodeOverlap: 2000, padding: 60, numIter: 300, gravity: 0.25, initialTemp: 200, coolingFactor: 0.95, minTemp: 1.0 },
       wheelSensitivity: 0.3,
     });
 
@@ -338,6 +339,12 @@ export function NetworkAnalysis() {
       return label.includes(q) || id.includes(q);
     }).removeClass('faded');
   }, [searchQuery]);
+
+  const runLayout = (name: string) => {
+    setLayout(name);
+    if (!cyRef.current) return;
+    cyRef.current.layout({ name, animate: true, animationDuration: 600, fit: true, padding: 50, idealEdgeLength: 150, nodeRepulsion: 45000 }).run();
+  };
 
   const handleZoomIn = () => cyRef.current?.zoom({ level: cyRef.current.zoom() * 1.3 });
   const handleZoomOut = () => cyRef.current?.zoom({ level: cyRef.current.zoom() / 1.3 });
@@ -552,6 +559,18 @@ export function NetworkAnalysis() {
           <button onClick={handleFit} title="Fit to Screen" className="btn-ghost p-1.5"><Maximize className="w-4 h-4" /></button>
           <button onClick={handleFocus} title="Focus Selected" className="btn-ghost p-1.5"><Crosshair className="w-4 h-4" /></button>
           <div className="w-px h-5 bg-ink-600" />
+          <select
+            value={layout}
+            onChange={e => runLayout(e.target.value)}
+            className="bg-ink-800 text-gray-300 text-xs border border-ink-600 rounded px-1.5 py-1 cursor-pointer"
+            title="Graph Layout"
+          >
+            <option value="cose">Spread (Cose)</option>
+            <option value="circle">Circle</option>
+            <option value="concentric">Concentric</option>
+            <option value="breadthfirst">Hierarchical</option>
+            <option value="grid">Grid</option>
+          </select>
           <button onClick={handleReset} title="Reset" className="btn-ghost p-1.5"><RotateCcw className="w-4 h-4" /></button>
         </div>
 

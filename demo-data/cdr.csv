@@ -1,0 +1,16 @@
+id,caller,receiver,timestamp,duration,location,callType
+C001,P001,P002,2024-01-15 09:30:00,245,Mumbai,outgoing
+C002,P002,P003,2024-01-15 10:45:00,180,Mumbai,incoming
+C003,P001,P004,2024-01-15 14:20:00,320,Mumbai,outgoing
+C004,P005,P006,2024-01-16 08:15:00,95,Mumbai,incoming
+C005,P006,P001,2024-01-16 11:30:00,412,Mumbai,outgoing
+C006,P002,P007,2024-01-16 15:45:00,67,Mumbai,missed
+C007,P003,P008,2024-01-17 09:00:00,234,Mumbai,outgoing
+C008,P004,P001,2024-01-17 13:15:00,156,Mumbai,incoming
+C009,P001,P009,2024-01-17 16:30:00,489,Mumbai,outgoing
+C010,P009,P010,2024-01-18 10:00:00,278,Mumbai,incoming
+C011,P010,P001,2024-01-18 14:45:00,345,Mumbai,outgoing
+C012,P002,P001,2024-01-19 08:30:00,123,Mumbai,incoming
+C013,P005,P001,2024-01-19 11:00:00,567,Mumbai,outgoing
+C014,P006,P002,2024-01-19 15:30:00,89,Mumbai,missed
+C015,P001,P006,2024-01-20 09:45:00,234,Mumbai,outgoing

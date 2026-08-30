@@ -6,6 +6,7 @@ export interface DatasetContextValue {
   settings: AISettings;
   loading: boolean;
   analyzing: boolean;
+  apiAvailable: boolean | null;
   loadDemoData: () => void;
   analyzeNetwork: () => void;
   resetDataset: () => void;

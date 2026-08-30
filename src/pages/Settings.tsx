@@ -19,6 +19,8 @@ export function SettingsPage() {
 
   const testConnection = async () => {
     setTesting(true);
+    // Save first so context is up to date
+    updateSettings(localSettings);
     const { testConnection: test } = await import('@/services/aiService');
     const result = await test(localSettings);
     setTestResult(result);

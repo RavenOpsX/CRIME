@@ -1,0 +1,11 @@
+id,name,type
+L001,Mumbai Central,hub
+L002,Andheri West,residential
+L003,Dadar,commercial
+L004,Borivali,residential
+L005,Juhu,residential
+L006,Malad,industrial
+L007,Thane,residential
+L008,Navi Mumbai,commercial
+L009,Powai,commercial
+L010,Bandra,residential
